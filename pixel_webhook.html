@@ -1,0 +1,328 @@
+{\rtf1\ansi
+{\fonttbl\f0\fnil\fcharset0 .SFUI-Regular;\f1\fnil\fcharset0 .AppleColorEmojiUI;}
+{\colortbl;\red255\green255\blue255;}
+\f0\fs32 \cf0 \cb1 \ql\ri8640
+<!DOCTYPE html>\
+<html lang="en">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>Pixel Art Discord Webhook Sender</title>\
+    <style>\
+        /* Pixel Art Style CSS */\
+        body \{\
+            font-family: 'Press Start 2P', cursive, sans-serif;\
+            background-color: #2c2c2c;\
+            color: #ffffff;\
+            line-height: 1.6;\
+            max-width: 800px;\
+            margin: 0 auto;\
+            padding: 20px;\
+            image-rendering: pixelated;\
+        \}\
+        \
+        h1, h2, h3 \{\
+            color: #ff6b6b;\
+            text-shadow: 3px 3px 0 #000;\
+            margin-bottom: 20px;\
+        \}\
+        \
+        .container \{\
+            background-color: #3c3c3c;\
+            border: 4px solid #000;\
+            padding: 20px;\
+            margin-bottom: 20px;\
+            box-shadow: 5px 5px 0 #000;\
+        \}\
+        \
+        .pixel-input \{\
+            background-color: #4c4c4c;\
+            border: 2px solid #000;\
+            color: #fff;\
+            padding: 8px;\
+            font-family: 'Press Start 2P', cursive, sans-serif;\
+            font-size: 12px;\
+            width: 100%;\
+            box-sizing: border-box;\
+            margin-bottom: 10px;\
+        \}\
+        \
+        .pixel-button \{\
+            background-color: #ff6b6b;\
+            color: #fff;\
+            border: 2px solid #000;\
+            padding: 10px 15px;\
+            font-family: 'Press Start 2P', cursive, sans-serif;\
+            font-size: 12px;\
+            cursor: pointer;\
+            margin-right: 10px;\
+            box-shadow: 3px 3px 0 #000;\
+            transition: all 0.1s;\
+        \}\
+        \
+        .pixel-button:hover \{\
+            transform: translate(2px, 2px);\
+            box-shadow: 1px 1px 0 #000;\
+        \}\
+        \
+        .color-box \{\
+            width: 20px;\
+            height: 20px;\
+            display: inline-block;\
+            border: 2px solid #000;\
+            margin-right: 5px;\
+            vertical-align: middle;\
+        \}\
+        \
+        .success \{\
+            color: #6bff6b;\
+            margin-top: 10px;\
+        \}\
+        \
+        .error \{\
+            color: #ff6b6b;\
+            margin-top: 10px;\
+        \}\
+        \
+        /* Pixel art border effects */\
+        .pixel-border \{\
+            border-style: solid;\
+            border-width: 4px;\
+            border-image: repeating-linear-gradient(45deg, #000, #000 2px, #ff6b6b 2px, #ff6b6b 4px) 10;\
+        \}\
+        \
+        .secret-info \{\
+            background-color: #5c5c5c;\
+            padding: 10px;\
+            border: 2px solid #000;\
+            margin: 10px 0;\
+            font-size: 10px;\
+        \}\
+    </style>\
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">\
+</head>\
+<body>\
+    <div class="container">\
+        <h1>\f1 \cb1 \uc0\u55356 \uc0\u57262 \f0 \cb1  Pixel Webhook Sender</h1>\
+        <p>Send Discord webhook messages with pixel art style embeds!</p>\
+        <div class="secret-info">\
+            \f1 \cb1 \uc0\u55357 \uc0\u56594 \f0 \cb1  Webhook URL is securely stored in GitHub Secrets\
+        </div>\
+    </div>\
+\
+    <div class="container">\
+        <h2>\f1 \cb1 \uc0\u55356 \uc0\u57256 \f0 \cb1  Embed Content</h2>\
+        \
+        <label for="title">Title:</label>\
+        <input type="text" id="title" class="pixel-input" placeholder="Embed Title">\
+        \
+        <label for="description">Description:</label>\
+        <textarea id="description" class="pixel-input" rows="3" placeholder="Embed description content"></textarea>\
+        \
+        <label for="color">Color:</label>\
+        <div>\
+            <div class="color-box" style="background-color:#ff6b6b;"></div>\
+            <input type="color" id="color" value="#ff6b6b">\
+            <span id="colorHex">#ff6b6b</span>\
+        </div>\
+        \
+        <h3>\f1 \cb1 \uc0\u55357 \uc0\u56764 \uc0\u65039 \f0 \cb1  Fields (Optional)</h3>\
+        <div id="fields">\
+            <div class="field-group">\
+                <input type="text" class="pixel-input field-name" placeholder="Field Name">\
+                <textarea class="pixel-input field-value" placeholder="Field Value"></textarea>\
+                <select class="pixel-input field-inline">\
+                    <option value="false">Not Inline</option>\
+                    <option value="true">Inline</option>\
+                </select>\
+                <button class="pixel-button remove-field">Remove</button>\
+            </div>\
+        </div>\
+        <button id="addField" class="pixel-button">+ Add Field</button>\
+        \
+        <h3>\f1 \cb1 \uc0\u55357 \uc0\u56420 \f0 \cb1  Footer (Optional)</h3>\
+        <input type="text" id="footer" class="pixel-input" placeholder="Footer text">\
+        \
+        <div style="margin-top: 20px;">\
+            <button id="sendWebhook" class="pixel-button">\f1 \cb1 \uc0\u55357 \uc0\u56960 \f0 \cb1  Send Webhook</button>\
+            <button id="preview" class="pixel-button">\f1 \cb1 \uc0\u55357 \uc0\u56384 \f0 \cb1  Preview Embed</button>\
+        </div>\
+        \
+        <div id="result"></div>\
+    </div>\
+\
+    <div class="container" id="previewContainer" style="display: none;">\
+        <h2>\f1 \cb1 \uc0\u55357 \uc0\u56384 \f0 \cb1  Embed Preview</h2>\
+        <div id="embedPreview"></div>\
+    </div>\
+\
+    <script>\
+        // Webhook URL will be injected by GitHub Actions during build\
+        const WEBHOOK_URL = '\{\{DISCORD_WEBHOOK_URL\}\}';\
+        \
+        document.addEventListener('DOMContentLoaded', function() \{\
+            // Check if webhook URL is properly set\
+            if (WEBHOOK_URL === '\{\{DISCORD_WEBHOOK_URL\}\}' || !WEBHOOK_URL) \{\
+                document.getElementById('result').className = 'error';\
+                document.getElementById('result').innerHTML = \
+                    '\f1 \cb1 \uc0\u10060 \f0 \cb1  Webhook URL not configured. Please check GitHub Secrets setup.';\
+                document.getElementById('sendWebhook').disabled = true;\
+            \}\
+            \
+            // Update color hex display\
+            const colorPicker = document.getElementById('color');\
+            const colorHex = document.getElementById('colorHex');\
+            \
+            colorPicker.addEventListener('input', function() \{\
+                colorHex.textContent = this.value;\
+            \});\
+            \
+            // Add field functionality\
+            document.getElementById('addField').addEventListener('click', function() \{\
+                const fieldGroup = document.createElement('div');\
+                fieldGroup.className = 'field-group';\
+                fieldGroup.innerHTML = `\
+                    <input type="text" class="pixel-input field-name" placeholder="Field Name">\
+                    <textarea class="pixel-input field-value" placeholder="Field Value"></textarea>\
+                    <select class="pixel-input field-inline">\
+                        <option value="false">Not Inline</option>\
+                        <option value="true">Inline</option>\
+                    </select>\
+                    <button class="pixel-button remove-field">Remove</button>\
+                `;\
+                document.getElementById('fields').appendChild(fieldGroup);\
+                \
+                // Add remove functionality to new button\
+                fieldGroup.querySelector('.remove-field').addEventListener('click', function() \{\
+                    fieldGroup.remove();\
+                \});\
+            \});\
+            \
+            // Add remove functionality to existing buttons\
+            document.querySelectorAll('.remove-field').forEach(button => \{\
+                button.addEventListener('click', function() \{\
+                    this.parentElement.remove();\
+                \});\
+            \});\
+            \
+            // Preview functionality\
+            document.getElementById('preview').addEventListener('click', function() \{\
+                generatePreview();\
+                document.getElementById('previewContainer').style.display = 'block';\
+            \});\
+            \
+            // Send webhook functionality\
+            document.getElementById('sendWebhook').addEventListener('click', function() \{\
+                sendWebhook();\
+            \});\
+        \});\
+        \
+        function generatePreview() \{\
+            const embed = createEmbedData();\
+            const previewContainer = document.getElementById('embedPreview');\
+            \
+            previewContainer.innerHTML = `\
+                <div style="\
+                    border-left: 5px solid $\{embed.color\};\
+                    background: #2c2c2c;\
+                    padding: 15px;\
+                    margin: 10px 0;\
+                    border-radius: 4px;\
+                    font-family: sans-serif;\
+                ">\
+                    <h3 style="color: #fff; margin-top: 0;">$\{embed.title || 'No Title'\}</h3>\
+                    <p style="color: #dcdcdc;">$\{embed.description || 'No description provided'\}</p>\
+                    $\{embed.fields && embed.fields.length > 0 ? `\
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 15px 0;">\
+                            $\{embed.fields.map(field => `\
+                                <div style="$\{field.inline ? 'display: inline-block; width: calc(33% - 10px); margin-right: 10px;' : 'grid-column: 1 / -1;'\}">\
+                                    <strong style="color: #fff;">$\{field.name\}</strong>\
+                                    <p style="color: #dcdcdc; margin: 5px 0;">$\{field.value\}</p>\
+                                </div>\
+                            `).join('')\}\
+                        </div>\
+                    ` : ''\}\
+                    $\{embed.footer ? `<div style="color: #999; font-size: 12px; margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">$\{embed.footer.text\}</div>` : ''\}\
+                </div>\
+            `;\
+        \}\
+        \
+        function createEmbedData() \{\
+            // Get all field data\
+            const fields = [];\
+            document.querySelectorAll('.field-group').forEach(group => \{\
+                const name = group.querySelector('.field-name').value;\
+                const value = group.querySelector('.field-value').value;\
+                const inline = group.querySelector('.field-inline').value === 'true';\
+                \
+                if (name && value) \{\
+                    fields.push(\{ name, value, inline \});\
+                \}\
+            \});\
+            \
+            // Convert color from hex to decimal\
+            const colorHex = document.getElementById('color').value;\
+            const colorDec = parseInt(colorHex.replace('#', ''), 16);\
+            \
+            // Create embed object\
+            const embed = \{\
+                title: document.getElementById('title').value,\
+                description: document.getElementById('description').value,\
+                color: colorDec,\
+                fields: fields,\
+                footer: document.getElementById('footer').value ? \{ \
+                    text: document.getElementById('footer').value \
+                \} : null\
+            \};\
+            \
+            return embed;\
+        \}\
+        \
+        function sendWebhook() \{\
+            if (!WEBHOOK_URL || WEBHOOK_URL === '\{\{DISCORD_WEBHOOK_URL\}\}') \{\
+                showResult('Webhook URL not configured properly', 'error');\
+                return;\
+            \}\
+            \
+            const embed = createEmbedData();\
+            \
+            // Prepare the webhook data\
+            const webhookData = \{\
+                username: "Pixel Webhook",\
+                avatar_url: "https://i.imgur.com/AfFp7pu.png",\
+                embeds: [embed]\
+            \};\
+            \
+            // Send the webhook\
+            fetch(WEBHOOK_URL, \{\
+                method: 'POST',\
+                headers: \{\
+                    'Content-Type': 'application/json'\
+                \},\
+                body: JSON.stringify(webhookData)\
+            \})\
+            .then(response => \{\
+                if (response.ok) \{\
+                    showResult('Webhook sent successfully!', 'success');\
+                \} else \{\
+                    showResult('Failed to send webhook: ' + response.status, 'error');\
+                \}\
+            \})\
+            .catch(error => \{\
+                showResult('Error: ' + error.message, 'error');\
+            \});\
+        \}\
+        \
+        function showResult(message, type) \{\
+            const resultDiv = document.getElementById('result');\
+            resultDiv.className = type;\
+            resultDiv.innerHTML = message;\
+            \
+            // Clear result after 5 seconds\
+            setTimeout(() => \{\
+                resultDiv.innerHTML = '';\
+            \}, 5000);\
+        \}\
+    </script>\
+</body>\
+</html>}
