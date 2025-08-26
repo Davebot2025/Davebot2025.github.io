@@ -1,0 +1,104 @@
+name: 🚀 Deploy Secure Webhook Sender
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+# Set environment variables for the entire workflow
+env:
+  BUILD_DIR: '.'
+  OUTPUT_DIR: './build'
+
+jobs:
+  security-check:
+    name: 🔒 Security Validation
+    runs-on: ubuntu-latest
+    outputs:
+      secrets_configured: ${{ steps.check-secrets.outputs.configured }}
+    steps:
+      - name: Check for Discord Webhook Secret
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            echo "✅ Discord webhook secret is configured"
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Discord webhook secret is missing"
+            echo "configured=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  build-and-deploy:
+    name: 🛠️ Build and Deploy
+    runs-on: ubuntu-latest
+    needs: security-check
+    if: needs.security-check.outputs.secrets_configured == 'true'
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm install -g replace-in-file
+
+      - name: 🔧 Configure build environment
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          cp ${{ env.BUILD_DIR }}/pixel_webhook.html ${{ env.OUTPUT_DIR }}/
+
+      - name: 🔄 Replace secret placeholders
+        run: |
+          cd ${{ env.OUTPUT_DIR }}
+          
+          # Replace webhook URL placeholder with actual secret
+          replace-in-file \
+            "'{{DISCORD_WEBHOOK_URL}}'" \
+            "'${{ secrets.DISCORD_WEBHOOK_URL }}'" \
+            pixel_webhook.html \
+            --isRegex
+          
+          # Add configuration status
+          replace-in-file \
+            "'{{CONFIGURATION_STATUS}}'" \
+            "'configured'" \
+            pixel_webhook.html \
+            --isRegex
+          
+          echo "✅ Secrets injected successfully"
+
+      - name: 📋 List build files
+        run: ls -la ${{ env.OUTPUT_DIR }}
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.OUTPUT_DIR }}
+          publish_branch: gh-pages
+          keep_files: true
+          force_orphan: false
+
+      - name: ✅ Deployment Success
+        run: |
+          echo "🎉 Website deployed successfully!"
+          echo "Visit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+
+  deployment-failed:
+    name: ❌ Deployment Failed
+    runs-on: ubuntu-latest
+    needs: security-check
+    if: needs.security-check.outputs.secrets_configured == 'false' || failure()
+    
+    steps:
+      - name: Display failure message
+        run: |
+          echo "❌ Deployment failed due to missing secrets or other error"
+          echo "Please ensure DISCORD_WEBHOOK_URL secret is configured in repository settings"
