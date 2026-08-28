@@ -53,15 +53,8 @@ async function run() {
         return;
     }
 
-    let parsed;
-    try {
-        parsed = new URL(targetURL);
-    } catch (e) {
-        console.log(`Invalid URL: ${targetURL}`);
-        Script.complete();
-        return;
-    }
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    targetURL = targetURL.trim();
+    if (!/^https?:\/\/.+/i.test(targetURL)) {
         console.log(`Refusing non-http(s) URL: ${targetURL}`);
         Script.complete();
         return;
