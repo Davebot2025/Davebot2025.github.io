@@ -1,7 +1,8 @@
 // Scriptable: bounded anti-click-farm test tool
-// Opens a fixed, small number of Safari tabs against a URL you supply,
-// logging each attempt for later review. Iteration count is hardcoded
-// intentionally so this cannot be turned into an unbounded loop.
+// Makes a fixed, small number of HTTP GET requests against a URL you
+// supply, entirely within Scriptable (no Safari tabs), logging each
+// response for later review. Iteration count is hardcoded intentionally
+// so this cannot be turned into an unbounded loop.
 
 const MAX_ITERATIONS = 10;      // fixed cap — do not parameterize
 const DELAY_SECONDS = 3;        // pause between opens, avoids self-DoS
@@ -34,7 +35,7 @@ async function run() {
     } else {
         const alert = new Alert();
         alert.title = "Anti-Click-Farm Test";
-        alert.message = `Enter the URL to test (max ${MAX_ITERATIONS} opens).`;
+        alert.message = `Enter the URL to test (max ${MAX_ITERATIONS} requests).`;
         alert.addTextField("https://yourdomain.com/page", "");
         alert.addAction("Start");
         alert.addCancelAction("Cancel");
@@ -67,9 +68,19 @@ async function run() {
 
     for (let i = 1; i <= MAX_ITERATIONS; i++) {
         try {
-            await appendLog(fm, logPath, `Iteration ${i}/${MAX_ITERATIONS}: opening Safari for ${targetURL}`);
-            const opened = await Safari.open(targetURL);
-            await appendLog(fm, logPath, `Iteration ${i}/${MAX_ITERATIONS}: Safari.open returned ${opened}`);
+            const req = new Request(targetURL);
+            req.method = "GET";
+            req.headers = { "User-Agent": "ScriptableAntiClickFarmTest/1.0" };
+
+            const startedAt = Date.now();
+            await req.load();
+            const elapsedMs = Date.now() - startedAt;
+
+            await appendLog(
+                fm,
+                logPath,
+                `Iteration ${i}/${MAX_ITERATIONS}: GET ${targetURL} -> status ${req.response.statusCode}, ${elapsedMs}ms`
+            );
         } catch (e) {
             await appendLog(fm, logPath, `Iteration ${i}/${MAX_ITERATIONS}: ERROR ${e}`);
         }
